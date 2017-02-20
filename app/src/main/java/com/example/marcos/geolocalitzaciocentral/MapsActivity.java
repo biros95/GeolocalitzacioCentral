@@ -44,7 +44,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener {
-
+    //Variables
     private GoogleMap mMap;
     ArrayList<LatLng> MarkerPoints;
     GoogleApiClient mGoogleApiClient;
@@ -52,31 +52,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     Marker mCurrLocationMarker;
     LocationRequest mLocationRequest;
 
+    /*
+     * OnCreate
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-
+        //Comprueva la version de andoid
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkLocationPermission();
         }
-        // Initializing
+        // Inizializar arrayList
         MarkerPoints = new ArrayList<>();
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        // Obtener el SupportMapFragment y notificar cuando el mapa esta listo para ser utilizado.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
     }
 
     /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
+     * Manipula el mapa una vez disponible.
+     * Agregar las rutas,marcadores o mover la camara.
+     * Se utiliza la ubicacion origen y fin para obtener la ruta.
+     * Si los servicios de Google Play no están instalados en el dispositivo, se le pedirá al usuario que instale
+     * Dentro del SupportMapFragment. Este método sólo se activará una vez que el usuario haya
+     * Instaló los servicios de Google Play y volvió a la aplicación.
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -153,25 +155,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+    /*
+     * Metodo para obtener la ruta y la url.
+     */
     private String getUrl(LatLng origin, LatLng dest) {
 
-        // Origin of route
+        // Origen de la ruta
         String str_origin = "origin=" + origin.latitude + "," + origin.longitude;
 
-        // Destination of route
+        // Destino de la ruta
         String str_dest = "destination=" + dest.latitude + "," + dest.longitude;
 
 
-        // Sensor enabled
+        // Sensor
         String sensor = "sensor=false";
 
-        // Building the parameters to the web service
+        // Pasar los parametros al webService.
         String parameters = str_origin + "&" + str_dest + "&" + sensor;
 
-        // Output format
+        // Output
         String output = "json";
 
-        // Building the url to the web service
+        // url del webservice.
         String url = "https://maps.googleapis.com/maps/api/directions/" + output + "?" + parameters;
 
 
@@ -179,7 +184,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     /**
-     * A method to download json data from url
+     * Descarga datos json de la url
      */
     private String downloadUrl(String strUrl) throws IOException {
         String data = "";
@@ -188,19 +193,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         try {
             URL url = new URL(strUrl);
 
-            // Creating an http connection to communicate with url
+            // Creación de una conexión http para comunicarse con url
             urlConnection = (HttpURLConnection) url.openConnection();
 
-            // Connecting to url
+            // Conectar
             urlConnection.connect();
 
-            // Reading data from url
+            // Leer datos
             iStream = urlConnection.getInputStream();
 
+            //BufferedReader para leer el inputStrem isStream
             BufferedReader br = new BufferedReader(new InputStreamReader(iStream));
 
             StringBuffer sb = new StringBuffer();
 
+            //Leelo hasta el final y guardalo en line.
             String line = "";
             while ((line = br.readLine()) != null) {
                 sb.append(line);
@@ -219,17 +226,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return data;
     }
 
-    // Fetches data from url passed
+    // Recupera los datos del url pasado
     private class FetchUrl extends AsyncTask<String, Void, String> {
 
+        /*
+         * Tarea en background
+         */
         @Override
         protected String doInBackground(String... url) {
-
-            // For storing data from web service
             String data = "";
 
             try {
-                // Fetching the data from web service
+                // Recupera los datos del WebService.
                 data = downloadUrl(url[0]);
                 Log.d("Background Task data", data.toString());
             } catch (Exception e) {
@@ -251,11 +259,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     /**
-     * A class to parse the Google Places in JSON format
+     * Clase para pasarlo a Json.
      */
     private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
 
-        // Parsing the data in non-ui thread
         @Override
         protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
 
@@ -361,7 +368,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mCurrLocationMarker.remove();
         }
 
-        //Place current location marker
+        //Poner un Marcador
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latLng);
@@ -369,11 +376,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
         mCurrLocationMarker = mMap.addMarker(markerOptions);
 
-        //move map camera
+        //Mover Camara
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
 
-        //stop location updates
+        //Parar las localizaciones
         if (mGoogleApiClient != null) {
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
         }
@@ -391,22 +398,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
 
-            // Asking user if explanation is needed
+            // Solicitar al usuario si se necesita una explicación
             if (ActivityCompat.shouldShowRequestPermissionRationale(this,
                     Manifest.permission.ACCESS_FINE_LOCATION)) {
 
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
+                // Muestra una explicación al usuario * asincrónicamente * - no bloquea
+                // este hilo esperando la respuesta del usuario! Después de que el usuario
+                // ve la explicación, vuelve a intentar solicitar el permiso.
 
-                //Prompt the user once explanation has been shown
+                // Solicitar al usuario una vez que se ha mostrado la explicación
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                         MY_PERMISSIONS_REQUEST_LOCATION);
 
 
             } else {
-                // No explanation needed, we can request the permission.
+                // Solicitar el permiso
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                         MY_PERMISSIONS_REQUEST_LOCATION);
@@ -422,12 +429,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                            String permissions[], int[] grantResults) {
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST_LOCATION: {
-                // If request is cancelled, the result arrays are empty.
+                // Si se cancela los arrays se quedan vacios.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-                    // permission was granted. Do the
-                    // contacts-related task you need to do.
                     if (ContextCompat.checkSelfPermission(this,
                             Manifest.permission.ACCESS_FINE_LOCATION)
                             == PackageManager.PERMISSION_GRANTED) {
@@ -440,14 +445,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 } else {
 
-                    // Permission denied, Disable the functionality that depends on this permission.
                     Toast.makeText(this, "permission denied", Toast.LENGTH_LONG).show();
                 }
                 return;
             }
-
-            // other 'case' lines to check for other permissions this app might request.
-            // You can add here other case statements according to your requirement.
         }
     }
 }
