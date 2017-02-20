@@ -40,7 +40,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class MapsActivity extends Fragment implements OnMapReadyCallback {
+public class MapsActivity2 extends Fragment implements OnMapReadyCallback {
 
     int numMarkersInRainbow[] =
             {
@@ -59,7 +59,7 @@ public class MapsActivity extends Fragment implements OnMapReadyCallback {
             };
 
     private GoogleMap mMap;
-    getLastPositionAllBus glpab = new getLastPositionAllBus();
+    MapsActivity2.getLastPositionAllBus glpab = new MapsActivity2.getLastPositionAllBus();
     LatLng[] arrayPosiciones;
     String[][] arrayDatos;
     LatLngBounds.Builder builder;
@@ -69,10 +69,13 @@ public class MapsActivity extends Fragment implements OnMapReadyCallback {
     private DrawerLayout drawerLayout;
     private NavigationView navView;
 
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.activity_maps, container,false);
+        matricula = getArguments().getString("edttext");
+        Log.i(matricula, " LOG");
+        return inflater.inflate(R.layout.activity_maps, container, false);
     }
 
     @Override
@@ -87,9 +90,6 @@ public class MapsActivity extends Fragment implements OnMapReadyCallback {
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
     }
-
-
-
 
 
     /**
@@ -118,7 +118,7 @@ public class MapsActivity extends Fragment implements OnMapReadyCallback {
             boolean correcto = true;
             URL url = null;
             try {
-                url = new URL("http://192.168.1.133:8080/WebService2/webresources/generic/todos/ubicacion");
+                url = new URL("http://192.168.1.133:8080/WebService2/webresources/generic/ultimasPosDeUnBus/+" +matricula);
 
                 HttpURLConnection con = (HttpURLConnection) url.openConnection();
                 con.setRequestProperty("content-type", "application/json");

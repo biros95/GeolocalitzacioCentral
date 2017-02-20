@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/menu_seccion_1"
+            android:icon="@drawable/ic_menu"
+            android:title="@string/seccion_1"/>
+
+    </group>
+
+    <item
+        android:id="@+id/navigation_subheader"
+        android:title="@string/otras_opciones">
+        <menu>
+            <item
+                android:id="@+id/menu_opcion_1"
+                android:icon="@drawable/ic_menu"
+                android:title="@string/opcion_1"/>
+            <item
+                android:id="@+id/menu_opcion_2"
+                android:icon="@drawable/ic_menu"
+                android:title="@string/opcion_2"/>
+            <item
+                android:id="@+id/menu_opcion_3"
+                android:icon="@drawable/ic_menu"
+                android:title="@string/opcion_3"/>
+            <item
+                android:id="@+id/menu_opcion_4"
+                android:icon="@drawable/ic_menu"
+                android:title="@string/opcion_4"/>
+            <item
+                android:id="@+id/menu_opcion_5"
+                android:icon="@drawable/ic_menu"
+                android:title="@string/opcion_5"/>
+            <item
+                android:id="@+id/menu_opcion_6"
+                android:icon="@drawable/ic_menu"
+                android:title="@string/opcion_6"/>
+            <item
+                android:id="@+id/menu_opcion_7"
+                android:icon="@drawable/ic_menu"
+                android:title="@string/opcion_7"/>
+            <item
+                android:id="@+id/menu_opcion_8"
+                android:icon="@drawable/ic_menu"
+                android:title="@string/opcion_8"/>
+            <item
+                android:id="@+id/menu_opcion_9"
+                android:icon="@drawable/ic_menu"
+                android:title="@string/opcion_9"/>
+        </menu>
+
+    </item>
+</menu>
