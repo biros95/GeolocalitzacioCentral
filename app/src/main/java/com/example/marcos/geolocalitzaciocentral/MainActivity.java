@@ -47,7 +47,9 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (savedInstanceState == null) {
 
+        }
         /*
         //Eventos del Drawer Layout
         drawerLayout.setDrawerListener(new DrawerLayout.DrawerListener() {

@@ -1,5 +1,6 @@
 package com.example.marcos.geolocalitzaciocentral;
 
+import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -112,7 +113,14 @@ public class MapsActivity extends Fragment implements OnMapReadyCallback {
 
         public getLastPositionAllBus() {
         }
-
+        ProgressDialog dialog;
+        @Override
+        public void onPreExecute() {
+            dialog = new ProgressDialog(getActivity());
+            dialog.setMessage("Cargando posiciones");
+            dialog.setCancelable(false);
+            dialog.show();
+        }
         protected Boolean doInBackground(Void... params) {
 
             boolean correcto = true;
@@ -168,7 +176,9 @@ public class MapsActivity extends Fragment implements OnMapReadyCallback {
          * @param result
          */
         protected void onPostExecute(Boolean result) {
-
+            if (dialog.isShowing()) {
+                dialog.dismiss();
+            }
             if (result) {
 
                 Toast.makeText(getActivity(), "Posiciones obtenidas", Toast.LENGTH_SHORT).show();

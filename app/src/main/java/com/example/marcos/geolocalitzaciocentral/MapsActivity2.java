@@ -1,5 +1,7 @@
 package com.example.marcos.geolocalitzaciocentral;
 
+import android.app.ProgressDialog;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -29,6 +31,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -39,8 +42,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 
 public class MapsActivity2 extends Fragment implements OnMapReadyCallback {
+
 
     int numMarkersInRainbow[] =
             {
@@ -92,6 +98,8 @@ public class MapsActivity2 extends Fragment implements OnMapReadyCallback {
     }
 
 
+
+
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -101,55 +109,81 @@ public class MapsActivity2 extends Fragment implements OnMapReadyCallback {
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
      */
+
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
     }
+    /**
+     * Metodo que utilizamos para pintar la linea de recorrido del bus.
+     * @param ubicaciones
+     */
+    public void pintarLinea(List<LatLng> ubicaciones) {
+        mMap.addPolyline(new PolylineOptions().addAll(ubicaciones).color(Color.GREEN));
+    }
+
 
 
     public class getLastPositionAllBus extends AsyncTask<Void, Void, Boolean> {
 
         public getLastPositionAllBus() {
         }
+        ProgressDialog dialog;
 
+        @Override
+        public void onPreExecute() {
+            dialog = new ProgressDialog(getActivity());
+            dialog.setMessage("Cargando posiciones");
+            dialog.setCancelable(false);
+            dialog.show();
+        }
         protected Boolean doInBackground(Void... params) {
 
             boolean correcto = true;
-            URL url = null;
-            try {
-                url = new URL("http://192.168.1.133:8080/WebService2/webresources/generic/ultimasPosDeUnBus/+" +matricula);
 
-                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            try {
+
+                StringBuffer url = new StringBuffer().append("http://192.168.1.133:8080/WebService2/webresources/generic/ultimasPosDeUnBus/"+matricula);
+
+                System.out.println(url);
+                HttpURLConnection con = (HttpURLConnection) new URL(url.toString()).openConnection();
+                con.setRequestMethod("GET");
                 con.setRequestProperty("content-type", "application/json");
+                int codigoRespuesta = con.getResponseCode();
+                Log.i("CODIGO", "GET: " + codigoRespuesta);
                 InputStream in = new BufferedInputStream(con.getInputStream());
 
-                con.connect();
 
-                InputStreamReader isw = new InputStreamReader(in);
-
-                BufferedReader br = new BufferedReader(isw);
-                StringBuilder sb = new StringBuilder();
-                String line;
-
-                while ((line = br.readLine()) != null) {
-                    sb.append(line);
-                }
+                if (codigoRespuesta == HttpURLConnection.HTTP_OK) {
 
 
-                JSONArray arrayPos = new JSONArray(sb.toString());
-                arrayPosiciones = new LatLng[arrayPos.length()];
-                arrayDatos = new String[arrayPos.length()][arrayPos.length()];
-                for (int i = 0; i < arrayPos.length(); i++) {
+                    InputStreamReader isw = new InputStreamReader(in);
 
-                    JSONObject pos = arrayPos.getJSONObject(i);
-                    arrayDatos[i][0] = pos.getString("matricula");
+                    BufferedReader br = new BufferedReader(isw);
+                    StringBuilder sb = new StringBuilder();
+                    String line;
 
-                    double latitud = pos.getDouble("latitud");
-                    double longitud = pos.getDouble("longitud");
-                    arrayDatos[i][1] = pos.getString("data");
-                    arrayPosiciones[i] = new LatLng(latitud, longitud);
+                    while ((line = br.readLine()) != null) {
+                        sb.append(line);
+                    }
+                    isw.close();
 
+                    JSONArray arrayPos = new JSONArray(sb.toString());
+                    arrayPosiciones = new LatLng[arrayPos.length()];
+                    arrayDatos = new String[arrayPos.length()][arrayPos.length()];
+                    for (int i = 0; i < arrayPos.length(); i++) {
+
+                        JSONObject pos = arrayPos.getJSONObject(i);
+                        arrayDatos[i][0] = pos.getString("matricula");
+
+                        double latitud = pos.getDouble("latitud");
+                        double longitud = pos.getDouble("longitud");
+                        arrayDatos[i][1] = pos.getString("data");
+                        arrayPosiciones[i] = new LatLng(latitud, longitud);
+
+                    }
                 }
                 if (!con.equals("true")) {
                     correcto = true;
@@ -168,6 +202,9 @@ public class MapsActivity2 extends Fragment implements OnMapReadyCallback {
          * @param result
          */
         protected void onPostExecute(Boolean result) {
+            if (dialog.isShowing()) {
+                dialog.dismiss();
+            }
 
             if (result) {
 
@@ -180,6 +217,8 @@ public class MapsActivity2 extends Fragment implements OnMapReadyCallback {
                             + arrayDatos[i][1]).icon(BitmapDescriptorFactory.fromResource(numMarkersInRainbow[i])));
 
                 }
+
+                pintarLinea(Arrays.asList(arrayPosiciones));
                 zoomCamara(arrayPosiciones);
             } else {
                 Toast.makeText(getActivity(), "Sense posicions", Toast.LENGTH_SHORT).show();
